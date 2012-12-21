@@ -1,0 +1,144 @@
+// ==========================================================
+
+// Base font size in pixels, if not already defined.
+// Should be the same as the font-size of the html element.
+//$base-font-size: 16px !default;
+$rem-with-px-fallback: true !default;
+
+// @private Number of pixels in 1rem.
+// For px -> rem, divide by this ratio; for the other way, multiply.
+$base-font-size: 16px !default;
+$px-per-rem: $base-font-size / 1rem;
+
+// Return pixel values as rem
+@function px-to-rem($px-value) {
+  @return $px-value / $px-per-rem;
+}
+
+// Return rem values as px
+@function rem-to-px($rem-value) {
+  @return $rem-value * $px-per-rem;
+}
+
+// For the given property, use rem units with px as a fallback value for older
+// browsers.
+//
+// $property - The css property name.
+// $values - The value (or space-separated list of values) for the property.
+// $use-px-fallback - Boolean, default: true; whether to use pixel fallback values
+//
+@mixin rem($property, $values, $use-px-fallback: $rem-with-px-fallback) {
+  // Create a couple of empty lists as output buffers.
+  $px-values: ();
+  $rem-values: ();
+
+  // Ensure $values is a list.
+  @if type-of($values) != "list" {
+    $values: join((), $values);
+  }
+
+  // Loop through the $values list
+  @each $value in $values {
+    // For each property value, if it's in rem or px, derive both rem and
+    // px values for it and add those to the end of the appropriate buffer.
+    @if(type-of($value) == number and not unitless($value) and (unit($value) == px or unit($value) == rem)) {
+      @if unit($value) == px {
+        $px-values: join($px-values, $value);
+        $rem-values: join($rem-values, px-to-rem($value));
+      }
+      @else {
+        $px-values: join($px-values, rem-to-px($value));
+        $rem-values: join($rem-values, $value);
+      }
+    }
+    @else {
+      $px-values: join($px-values, $value);
+      $rem-values: join($rem-values, $value);
+    }
+  }
+
+  // Use pixel fallback for browsers that don't understand rem units.
+  @if $use-px-fallback {
+    #{$property}: $px-values;
+  }
+
+  // Use rem values for everyone else (overrides pixel values).
+  #{$property}: $rem-values;
+}
+
+@mixin respond-to($min-width, $max-width: null) {
+  $fix-mqs: false !default;
+
+  // If we're outputting for a fixed media query set...
+  @if $fix-mqs {
+    // ...and if we should apply these rules...
+    @if $max-width != null {
+      @if (($fix-mqs >= $min-width) and ($fix-mqs <= $max-width)) {
+        // ...output the content the user gave us.
+        @content;
+      }
+    } @elseif ($fix-mqs >= $min-width) and $max-width == null {
+      // ...output the content the user gave us.
+      @content;
+    }
+  } @else {
+    // Otherwise, output it using a regular media query
+    $mq: "only screen and (min-width: #{$min-width})";
+
+    @if $max-width{
+      $mq: "#{$mq} and (max-width: #{$max-width})";
+    }
+    @media #{$mq} {
+        @content;
+    }
+  }
+}
+
+// generate background image url or data-uri
+@mixin bg-img($bg_img: false){
+  $old-ie: false !default;
+  @if $bg_img{
+    background:{
+      @if $old-ie{
+        // ie8 and less
+        image: image-url($bg_img);
+      } @else {
+        image: inline-image($bg_img);
+      }
+    }
+  }
+}
+
+@mixin old-ie {
+  $old-ie: false !default;
+  // Only use this content if we're dealing with old IE
+  @if $old-ie {
+    @content;
+  }
+}
+
+//  Inline Block(ib)  whitespace removal	==============================
+//  from http://yuilibrary.com/yui/docs/cssgrids/
+//  Apply this mixin to the parent element if targeted inline-block elements
+@mixin ib-no-whitespace() {
+  letter-spacing: -0.31em; /* webkit */
+  *letter-spacing: normal; /* reset IE < 8 */
+  word-spacing: -0.43em; /* IE < 8 && gecko */
+
+  & > * {
+		// reset letter and word spacing for inline-blocks
+    @include inline-block;
+    float: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+	}
+  &:before{
+    // pseudo element to help vertically align children
+    content:"";
+    display: inline-block;
+    height: 100%;
+    margin-left: -1px;
+    vertical-align: middle;
+    width:1px;
+  }
+}
