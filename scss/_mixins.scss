@@ -142,3 +142,40 @@ $px-per-rem: $base-font-size / 1rem;
     width:1px;
   }
 }
+
+//  Image Crop  ============================================================
+//  /gist.github.com/ralgh/4711695/
+//  Centers image vertically within parent element
+
+@mixin img-crop($percentage: 75%, $bg-color: #ededed) {
+
+  &, img {
+    width: 100%;
+  }
+  background-color: $bg-color;
+  /* remove white-space for inline-block elements */
+  letter-spacing: -0.31em; /* webkit */
+  *letter-spacing: normal; /* reset IE < 8 */
+  overflow: hidden;
+  padding: 0;
+
+  &:before,
+  img{
+    /* vertically center the image */
+    display: inline-block;
+    vertical-align: middle;
+  }
+  &:before{
+    /* pseudo element to vertically align image to */
+    content: "";
+    
+    /* Magic Number */
+    /* Set this to your desired height(to width) ratio */
+    padding-top: $percentage; /* % of original image width */ 
+  }
+  img{
+    /* removes(sorta) image from the flow */
+    padding-left: 100%;
+    margin: -999em -100%;
+  }
+}
