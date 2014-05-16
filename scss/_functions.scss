@@ -1,0 +1,15 @@
+// _functions.scss
+$font-size-base: 16px !default;
+$page-width: 960px !default;
+
+@function em($target, $context: $font-size-base) {
+    @return ($target / $context) * 1em;
+}
+@function emrem($target, $context: $font-size-base) {
+    $target-em: em($target);
+    $scale-em: $font-size-base / $context;
+    @return $target-em * $scale-em;
+}
+@function pct($target, $context: $page-width) {
+    @return ($target / $context) * 100%;
+}
